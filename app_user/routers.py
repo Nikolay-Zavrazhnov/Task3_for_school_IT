@@ -7,6 +7,7 @@ from app_user.schemas import RequestUsers, Response
 
 router = APIRouter()
 
+
 def get_db():
     db = SessionLocal()
     try:
@@ -33,13 +34,28 @@ async def get_users(skip: int = 0, limit: int = 100, db: Session = Depends(get_d
 
 # получить список строк из таблицы БД по значению из столбца gender возможностью лимита
 @router.get("/{gender}")
-async def get_users_gender(gender: str=None, db: Session = Depends(get_db), skip: int = 0, limit: int = 100):
+async def get_users_gender(gender: str = None, db: Session = Depends(get_db), skip: int = 0, limit: int = 100):
     users = get_user_by_gender(db, gender, skip, limit)
 
     return Response(status="Ok", code="200", message="Success fetch all data", result=users)
+
 
 # Получить запись по конкретному id
 @router.get("/{id}")
 async def get_users_id(id: int, db: Session = Depends(get_db)):
     users = get_user_by_id(db, id)
     return Response(status="Ok", code="200", message="Success fetch all data", result=users).dict(exclude_none=True)
+
+
+# Изменить существующую запись
+@router.patch("/update")
+async def update_user(request: RequestUsers, db: Session = Depends(get_db)):
+    some_user = update_user(db, user_id=request.parameter.id,
+                            name=request.parameter.name, gender=request.parameter.gender)
+    return Response(status="Ok", code="200", message="Success update data", result=some_user)
+
+# удалить существующую запись
+@router.delete("/delete")
+async def delete_book(request: RequestUsers, db: Session = Depends(get_db)):
+    # remove_user(db, user_id=request.parameter.id)
+    return Response(status="Ok", code="200", message="Success delete data").dict(exclude_none=True)
